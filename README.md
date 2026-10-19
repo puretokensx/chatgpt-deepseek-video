@@ -28,4 +28,4 @@ gh release upload v1.0.0 /path/to/new-video.mp4 --repo puretokensx/puretokens-vi
 
 ## 旧入口
 
-最初的 `chatgpt-deepseek-video` 仓库已更名为本视频库。`puretokens-client-usage-video` 与 `puretokens-skill-video` 完成迁移后归档，仅保留历史链接兼容。今后请统一分享本仓库或上方下载地址。
+最初的 `chatgpt-deepseek-video` 仓库已更名为本视频库。原 `puretokens-client-usage-video` 与 `puretokens-skill-video` 仓库已清理删除；指向这两个旧仓库的历史下载链接不再使用。今后请统一分享本仓库或上方下载地址。
