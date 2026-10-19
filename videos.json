@@ -1,0 +1,27 @@
+{
+  "repository": "puretokensx/puretokens-videos",
+  "release_tag": "v1.0.0",
+  "videos": [
+    {
+      "title": "ChatGPT + DeepSeek 原视频",
+      "asset_name": "chatgpt-deepseek.mp4",
+      "bytes": 173965754,
+      "sha256": "5d71d9bc05b7a3356fd76504ee4d1bc0ff0b9353cb9c1cd6fc617c0580407286",
+      "download_url": "https://github.com/puretokensx/puretokens-videos/releases/download/v1.0.0/chatgpt-deepseek.mp4"
+    },
+    {
+      "title": "Pure Tokens 客户端使用教程",
+      "asset_name": "puretokens-client-usage.mp4",
+      "bytes": 592255168,
+      "sha256": "63d3723e66ef698292665aa9e7038939650e4e18299332efe8893ab462006f33",
+      "download_url": "https://github.com/puretokensx/puretokens-videos/releases/download/v1.0.0/puretokens-client-usage.mp4"
+    },
+    {
+      "title": "Skill 使用教程",
+      "asset_name": "skill.mp4",
+      "bytes": 380709716,
+      "sha256": "d18c67e81ee2b305addc3555120cd092806eda74b74a92268f450c5df3c1b48d",
+      "download_url": "https://github.com/puretokensx/puretokens-videos/releases/download/v1.0.0/skill.mp4"
+    }
+  ]
+}
