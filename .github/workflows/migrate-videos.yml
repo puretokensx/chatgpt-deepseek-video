@@ -1,0 +1,61 @@
+name: Migrate existing public videos
+"on":
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: video-library-migration
+  cancel-in-progress: false
+jobs:
+  migrate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Copy verified existing release assets
+        shell: python
+        run: |
+          import hashlib, json, os, shutil, subprocess, tempfile, urllib.request
+          from pathlib import Path
+          repo = os.environ["GITHUB_REPOSITORY"]
+          assert repo == "puretokensx/puretokens-videos"
+          assert shutil.which("gh")
+          def api(path):
+              return json.loads(subprocess.check_output(["gh", "api", path], text=True))
+          metadata = api("repos/" + repo)
+          assert metadata["id"] == 1421815607 and not metadata["private"]
+          release = api("repos/" + repo + "/releases/414674182")
+          assert release["tag_name"] == "v1.0.0" and not release.get("immutable")
+          videos = [{'asset_name': 'puretokens-client-usage.mp4', 'bytes': 592255168, 'sha256': '63d3723e66ef698292665aa9e7038939650e4e18299332efe8893ab462006f33', 'title': 'Pure Tokens 客户端使用教程', 'original_download_url': 'https://github.com/puretokensx/puretokens-client-usage-video/releases/download/v1.0.0/puretokens-client-usage.mp4'}, {'asset_name': 'skill.mp4', 'bytes': 380709716, 'sha256': 'd18c67e81ee2b305addc3555120cd092806eda74b74a92268f450c5df3c1b48d', 'title': 'Skill 使用教程', 'original_download_url': 'https://github.com/puretokensx/puretokens-skill-video/releases/download/v1.0.0/skill.mp4'}]
+          for video in videos:
+              assets = api("repos/" + repo + "/releases/414674182/assets")
+              existing = [a for a in assets if a["name"] == video["asset_name"]]
+              if existing:
+                  assert len(existing) == 1 and existing[0]["state"] == "uploaded"
+                  assert existing[0]["size"] == video["bytes"]
+                  assert existing[0]["digest"] == "sha256:" + video["sha256"]
+                  print("Already verified:", video["asset_name"], flush=True)
+                  continue
+              with tempfile.TemporaryDirectory(dir=os.environ["RUNNER_TEMP"]) as folder:
+                  path = Path(folder) / video["asset_name"]
+                  digest = hashlib.sha256()
+                  size = 0
+                  request = urllib.request.Request(video["original_download_url"], headers={"User-Agent": "puretokens-video-migration", "Accept-Encoding": "identity"})
+                  print("Downloading existing public asset:", video["asset_name"], flush=True)
+                  with urllib.request.urlopen(request, timeout=120) as response, path.open("wb") as output:
+                      for block in iter(lambda: response.read(4 * 1024 * 1024), b""):
+                          output.write(block)
+                          digest.update(block)
+                          size += len(block)
+                  assert size == video["bytes"] and digest.hexdigest() == video["sha256"]
+                  print("Source bytes and SHA-256 verified:", path.name, size, flush=True)
+                  subprocess.run(["gh", "release", "upload", "v1.0.0", str(path) + "#" + video["title"], "--repo", repo], check=True, timeout=600)
+              assets = api("repos/" + repo + "/releases/414674182/assets")
+              published = [a for a in assets if a["name"] == video["asset_name"]]
+              assert len(published) == 1
+              asset = published[0]
+              assert asset["state"] == "uploaded" and asset["size"] == video["bytes"]
+              assert asset["digest"] == "sha256:" + video["sha256"]
+              print("Target bytes and SHA-256 verified:", asset["name"], asset["size"], asset["digest"], flush=True)
+          print("MIGRATION_VERIFIED", flush=True)
